@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALUMNI NEBUL 2020</title>
+  <style>
+    @import url(https://fonts.googleapis.com/css?family=Lato:300italic);
+    /* ...existing code... */
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      scrollbar-width: none;
+      overflow: hidden;
+    }
+
+    body {
+      background: #f803cf;
+    }
+
+    .name {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    /* ============================================== Fire
+      */
+
+    .fuego {
+      border-radius: 100%;
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      margin-left: -2.6px;
+      width: 6.66666667px;
+      height: 18px;
+    }
+
+    .fuego:nth-child(1) {
+      animation: fuego 2s 6.5s infinite;
+    }
+
+    .fuego:nth-child(2) {
+      animation: fuego 1.5s 6.5s infinite;
+    }
+
+    .fuego:nth-child(3) {
+      animation: fuego 1s 6.5s infinite;
+    }
+
+    .fuego:nth-child(4) {
+      animation: fuego 0.5s 6.5s infinite;
+    }
+
+    .fuego:nth-child(5) {
+      animation: fuego 0.2s 6.5s infinite;
+    }
+
+    /* ============================================== Animation Fire
+      */
+
+    @keyframes fuego {
+
+      0%,
+      100% {
+        background: rgba(254, 248, 97, 0.5);
+        box-shadow: 0 0 40px 10px rgba(248, 233, 209, 0.2);
+        transform: translateY(0) scale(1);
+      }
+
+      50% {
+        background: rgba(255, 50, 0, 0.1);
+        box-shadow: 0 0 40px 20px rgba(248, 233, 209, 0.2);
+        transform: translateY(-20px) scale(0);
+      }
+    }
+
+    @keyframes in {
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .text {
+      color: #000000;
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      font-style: italic;
+      text-align: center;
+    }
+
+    .text h1 {
+      font-size: 1.4em;
+    }
+  </style>
+  <style>
+    @media (max-width: 600px) {
+      .fixed-bottom-btn {
+        bottom: 80px !important;
+      }
+    }
+
+    .back-button {
+      position: fixed;
+      top: 50px;
+      left: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-5px);
+    }
+
+    .back-button:active {
+      transform: translateX(-3px);
+    }
+
+    .back-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    @media (max-width: 480px) {
+      .back-button {
+        top: 20px;
+        left: 20px;
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+
+      .back-icon {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<!-- Efek Konfeti -->
+<canvas id="confetti" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999;"></canvas>
+
+<script>
+  function startConfetti() {
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = [];
+    const colors = ['#ffd6ec', '#ffe5f1', '#e3f6f5', '#fff3b0', '#e5ccff'];
+
+    for (let i = 0; i < 200; i++) {
+      pieces.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speed: Math.random() * 3 + 2,
+        rotation: Math.random() * 360,
+        rotationSpeed: Math.random() * 10 - 5
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      });
+    }
+
+    function update() {
+      pieces.forEach(p => {
+        p.y += p.speed;
+        p.rotation += p.rotationSpeed;
+        if (p.y > canvas.height) {
+          p.y = -10;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+    }
+
+    function loop() {
+      draw();
+      update();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  }
+
+  // Jalankan konfeti setelah 3 detik halaman terbuka
+  window.addEventListener('load', () => {
+    setTimeout(startConfetti, 3000);
+  });
+</script>
+
+  <!-- Tombol Back -->
+  <a href="name.html" onclick="window.history.back(); return false;" class="back-button">
+    <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+    <span>Back</span>
+  </a>
+  <div class="cake">
+    <div class="fuego"></div>
+    <div class="fuego"></div>
+    <div class="fuego"></div>
+    <div class="fuego"></div>
+    <div class="fuego"></div>
+  </div>
+  <div class="text">
+    <h1>ALUMNI SDN 01 BULAK THN 2020</h1>
+  </div>
+  <div style="height: 60px;"></div>
+
+  <div style="height: 40px;"></div>
+  <div style="height: 100px;"></div>
+  <div class="fixed-bottom-btn"
+  style="text-align: center; position: fixed; left: 0; right: 0; bottom: 40px; z-index: 9999; margin: 0 auto;">
+  <button
+    style="padding: 40px 50px; font-size: 0.8rem; border-radius: 8px; background: linear-gradient(135deg,#d88db8,#e8a8c4); color: white; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; font-family: 'Lato', sans-serif; font-weight: 700;"
+    onclick="window.location.href='utama.html'">
+    Click untuk melihat sesuatu yang sepesial!
+  </button>
+</div>
+
+<style>
+  @media (max-width: 480px) {
+    .fixed-bottom-btn button {
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      border-radius: 7px;
+    }
+  }
+</style>
+</body>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>WEBSITE ALUMNI NEBUL 2020</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+    }
+
+    #pw-gate {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #04fdd4;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 0;
+      margin: 0;
+    }
+
+    #pw-gate::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .login-card {
+      position: relative;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.65);
+      padding: 40px 30px;
+      border-radius: 22px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+      width: 90%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      color: white;
+    }
+
+    .login-card h2 {
+      margin: 0 0 15px 0;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #e0c9ff;
+      text-shadow: 0 0 8px #d88db8;
+    }
+
+    .login-card p {
+      color: #d88db8;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin: 0 0 20px 0;
+    }
+
+    #pin-display {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0 25px 0;
+    }
+
+    .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #bbb;
+      transition: background 0.1s ease;
+    }
+
+    #pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 15px;
+      justify-items: center;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .pin-btn {
+      background: rgba(255, 255, 255, 0.15);
+      color: #f2e5ff;
+      border: none;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 0 8px rgba(178, 102, 255, 0.3);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pin-btn:active {
+      background: rgba(178, 102, 255, 0.6) !important;
+      transform: scale(0.92);
+    }
+
+    .pin-btn.clicked {
+      background: rgba(178, 102, 255, 0.6);
+      transform: scale(0.92);
+    }
+
+    #pw-msg {
+      height: 20px;
+      color: #ffb3b3;
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin: 5px 0 0 0;
+    }
+
+    /* === Mobile Portrait === */
+    @media (max-width: 480px) {
+      .login-card {
+        width: 92%;
+        padding: 35px 25px;
+      }
+
+      .login-card h2 {
+        font-size: 1.75rem;
+        margin-bottom: 12px;
+      }
+
+      .login-card p {
+        font-size: 0.82rem;
+        line-height: 1.4;
+      }
+
+      .pin-btn {
+        width: 72px;
+        height: 72px;
+        font-size: 1.4rem;
+      }
+
+      #pin-keypad {
+        gap: 10px;
+        max-width: 260px;
+      }
+
+      .dot {
+        width: 14px;
+        height: 14px;
+      }
+
+      #pin-display {
+        gap: 8px;
+        margin: 18px 0 22px 0;
+      }
+
+      #pw-msg {
+        font-size: 0.88rem;
+      }
+    }
+
+    /* === Mobile Kecil === */
+    @media (max-width: 380px) {
+      .login-card {
+        width: 94%;
+        padding: 30px 20px;
+      }
+
+      .login-card h2 {
+        font-size: 1.6rem;
+      }
+
+      .login-card p {
+        font-size: 0.78rem;
+      }
+
+      .pin-btn {
+        width: 65px;
+        height: 65px;
+        font-size: 1.3rem;
+      }
+
+      #pin-keypad {
+        gap: 8px;
+        max-width: 230px;
+      }
+
+      .dot {
+        width: 13px;
+        height: 13px;
+      }
+    }
+
+    /* === Tablet === */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .login-card {
+        width: 85%;
+        max-width: 450px;
+        padding: 45px 35px;
+      }
+
+      .login-card h2 {
+        font-size: 2.1rem;
+      }
+
+      .login-card p {
+        font-size: 0.95rem;
+      }
+
+      .pin-btn {
+        width: 85px;
+        height: 85px;
+        font-size: 1.55rem;
+      }
+
+      #pin-keypad {
+        max-width: 320px;
+      }
+
+      .dot {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    /* === Desktop === */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .login-card {
+        max-width: 460px;
+        padding: 50px 40px;
+      }
+
+      .login-card h2 {
+        font-size: 2.2rem;
+      }
+
+      .pin-btn {
+        width: 90px;
+        height: 90px;
+        font-size: 1.6rem;
+      }
+
+      #pin-keypad {
+        max-width: 340px;
+      }
+
+      .dot {
+        width: 17px;
+        height: 17px;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .login-card {
+        max-width: 480px;
+        padding: 55px 45px;
+      }
+
+      .login-card h2 {
+        font-size: 2.3rem;
+        margin-bottom: 18px;
+      }
+
+      .login-card p {
+        font-size: 1rem;
+      }
+
+      .pin-btn {
+        width: 95px;
+        height: 95px;
+        font-size: 1.6rem;
+      }
+
+      .pin-btn:hover {
+        background: rgba(178, 102, 255, 0.35);
+        transform: scale(1.07);
+      }
+
+      #pin-keypad {
+        max-width: 360px;
+      }
+
+      .dot {
+        width: 18px;
+        height: 18px;
+      }
+
+      #pin-display {
+        margin: 25px 0;
+      }
+
+      #pw-msg {
+        font-size: 1rem;
+        height: 24px;
+      }
+    }
+
+    /* === Landscape Mobile === */
+    @media (max-height: 600px) and (orientation: landscape) {
+      .login-card {
+        padding: 20px 25px;
+        max-height: 95vh;
+        overflow-y: auto;
+      }
+
+      .login-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+      }
+
+      .login-card p {
+        font-size: 0.75rem;
+        margin-bottom: 12px;
+      }
+
+      .pin-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 1.2rem;
+      }
+
+      #pin-keypad {
+        gap: 8px;
+        max-width: 220px;
+        margin-bottom: 10px;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+      }
+
+      #pin-display {
+        gap: 6px;
+        margin: 12px 0 15px 0;
+      }
+
+      #pw-msg {
+        font-size: 0.8rem;
+        height: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="pw-gate">
+    <div class="login-card">
+      <h2>Memory Access</h2>
+
+      <p>
+        Masukkan PIN untuk membuka akses.<br>
+        Jika kamu salah memasukkan kata sandi sebanyak 5 kali berturut-turut, akses akan diblokir sementara dan kamu
+        harus menunggu 1 hari penuh sebelum dapat mencoba lagi.
+        <br>PW: 2020
+      </p>
+
+      <div id="pin-display">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <div id="pin-keypad">
+        <button class="pin-btn" data-value="1">1</button>
+        <button class="pin-btn" data-value="2">2</button>
+        <button class="pin-btn" data-value="3">3</button>
+        <button class="pin-btn" data-value="4">4</button>
+        <button class="pin-btn" data-value="5">5</button>
+        <button class="pin-btn" data-value="6">6</button>
+        <button class="pin-btn" data-value="7">7</button>
+        <button class="pin-btn" data-value="8">8</button>
+        <button class="pin-btn" data-value="9">9</button>
+        <button class="pin-btn" data-value="back">←</button>
+        <button class="pin-btn" data-value="0">0</button>
+        <button class="pin-btn" data-value="check">✔</button>
+      </div>
+
+      <p id="pw-msg">2020</p>
+    </div>
+  </div>
+
+  <script>
+    const PASSWORD = "2020";
+    let inputPIN = "";
+    const dots = document.querySelectorAll(".dot");
+    const msg = document.getElementById("pw-msg");
+    const gate = document.getElementById("pw-gate");
+
+    function updateDots() {
+      dots.forEach((dot, i) => {
+        dot.style.background = i < inputPIN.length ? "#d88db8" : "#bbb";
+      });
+    }
+
+    function checkPIN() {
+      if (inputPIN === PASSWORD) {
+        msg.textContent = "";
+        gate.style.display = "none";
+        window.location.href = "name.html";
+      } else {
+        msg.textContent = "PIN salah 🤣";
+        inputPIN = "";
+        updateDots();
+      }
+    }
+
+    function handleInput(val) {
+      if (val === "back") {
+        inputPIN = inputPIN.slice(0, -1);
+        updateDots();
+      } else if (val === "check") {
+        checkPIN();
+      } else {
+        if (inputPIN.length < 6) {
+          inputPIN += val;
+          updateDots();
+          
+          if (inputPIN.length === 6) {
+            setTimeout(() => checkPIN(), 300);
+          }
+        }
+      }
+    }
+
+    document.querySelectorAll(".pin-btn").forEach(btn => {
+      // Visual feedback untuk mobile
+      btn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        btn.classList.add("clicked");
+        handleInput(btn.getAttribute("data-value"));
+      });
+
+      btn.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        setTimeout(() => btn.classList.remove("clicked"), 150);
+      });
+
+      // Fallback untuk desktop
+      btn.addEventListener("mousedown", (e) => {
+        btn.classList.add("clicked");
+      });
+
+      btn.addEventListener("mouseup", (e) => {
+        setTimeout(() => btn.classList.remove("clicked"), 150);
+      });
+
+      btn.addEventListener("click", (e) => {
+        handleInput(btn.getAttribute("data-value"));
+      });
+
+      btn.addEventListener("contextmenu", (e) => e.preventDefault());
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #d88db8 0%, #d88db8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            perspective: 1500px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1.5 / 1;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .envelope-wrapper.opened {
+            transform: scale(0.85) translateY(-30px);
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #f5f1e8 0%, #e8e0d0 100%);
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .envelope:hover {
+            transform: translateY(-8px);
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.2),
+                inset 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Envelope fold lines */
+        .envelope::before,
+        .envelope::after {
+            content: '';
+            position: absolute;
+            background: rgba(0, 0, 0, 0.03);
+            height: 1px;
+        }
+
+        .envelope::before {
+            top: 0;
+            left: 0;
+            right: 50%;
+            transform-origin: right;
+            transform: rotate(30deg);
+        }
+
+        .envelope::after {
+            top: 0;
+            right: 0;
+            left: 50%;
+            transform-origin: left;
+            transform: rotate(-30deg);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(145deg, #f0ebe0 0%, #ddd5c5 100%);
+            transform-origin: top center;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 3;
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .envelope-flap::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+        }
+
+        .envelope.opened .envelope-flap {
+            transform: rotateX(-180deg);
+        }
+
+        /* Wax Seal */
+        .wax-seal {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: clamp(60px, 15vw, 90px);
+            height: clamp(60px, 15vw, 90px);
+            z-index: 4;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transition: all 0.3s ease;
+        }
+
+        .envelope-wrapper:hover .wax-seal {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .wax-seal img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        /* Letter Modal */
+        .letter-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(139, 126, 102, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            padding: 20px;
+        }
+
+        .letter-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .letter {
+            background: linear-gradient(145deg, #fffef9 0%, #faf8f2 100%);
+            width: 100%;
+            max-width: 650px;
+            max-height: 85vh;
+            border-radius: 8px;
+            padding: 50px 40px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                inset 0 1px 3px rgba(255, 255, 255, 0.9);
+            transform: scale(0.8) translateY(50px) rotateX(10deg);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow-y: auto;
+            border: 1px solid rgba(139, 126, 102, 0.2);
+        }
+
+        /* Paper texture */
+        .letter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139, 126, 102, 0.03) 2px,
+                    rgba(139, 126, 102, 0.03) 4px);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .letter-modal.active .letter {
+            transform: scale(1) translateY(0) rotateX(0);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #d88db8 0%, #d88db8 100%);
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 22px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(212, 165, 165, 0.4);
+            font-weight: 300;
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 6px 20px rgba(212, 165, 165, 0.6);
+        }
+
+        .letter-header {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(139, 126, 102, 0.15);
+        }
+
+        .letter-header h2 {
+            color: #8b7e66;
+            font-size: clamp(26px, 5vw, 38px);
+            font-weight: 400;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            font-family: 'Georgia', serif;
+        }
+
+        .letter-header .date {
+            color: #a89f8c;
+            font-size: clamp(12px, 2vw, 14px);
+            font-style: italic;
+            letter-spacing: 0.5px;
+        }
+
+        .letter-content {
+            color: #4a4337;
+            line-height: 1.9;
+            position: relative;
+        }
+
+        .letter-content p {
+            margin-bottom: 22px;
+            font-size: clamp(14px, 2.5vw, 16px);
+            text-indent: 30px;
+            text-align: justify;
+        }
+
+        .letter-content p:first-of-type {
+            text-indent: 0;
+        }
+
+        .letter-content .greeting {
+            font-style: italic;
+            color: #8b7e66;
+            margin-bottom: 25px;
+            text-indent: 0;
+        }
+
+        .highlight-quote {
+            background: linear-gradient(145deg, #f5f0e6 0%, #ede8dd 100%);
+            padding: 25px;
+            margin: 30px 0;
+            border-left: 4px solid #d88db8;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .highlight-quote::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            font-size: 50px;
+            color: #d88db8;
+            opacity: 0.3;
+            font-family: Georgia, serif;
+        }
+
+        .highlight-quote p {
+            margin: 0;
+            font-style: italic;
+            color: #5a5043;
+            text-indent: 0;
+            text-align: center;
+        }
+
+        .signature {
+            text-align: right;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(139, 126, 102, 0.15);
+        }
+
+        .signature .closing {
+            color: #8b7e66;
+            font-size: clamp(14px, 2.5vw, 16px);
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .signature .name {
+            color: #d4a5a5;
+            font-weight: 600;
+            font-size: clamp(16px, 3vw, 20px);
+            font-family: 'Brush Script MT', cursive, Georgia, serif;
+            letter-spacing: 0.5px;
+        }
+
+        .signature .ps {
+            margin-top: 20px;
+            font-size: clamp(12px, 2vw, 14px);
+            color: #a89f8c;
+            font-style: italic;
+        }
+
+        .instruction {
+            text-align: center;
+            color: #8b7e66;
+            margin-top: 25px;
+            font-size: clamp(13px, 2.5vw, 15px);
+            font-style: italic;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 480px) {
+            .letter {
+                padding: 35px 25px;
+                max-height: 80vh;
+            }
+
+            .close-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 20px;
+                top: 15px;
+                right: 15px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        .letter::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .letter::-webkit-scrollbar-track {
+            background: #f5f0e6;
+            border-radius: 10px;
+        }
+
+        .letter::-webkit-scrollbar-thumb {
+            background: linear-gradient(145deg, #d88db8 0%, #d88db8 100%);
+            border-radius: 10px;
+        }
+
+        .letter::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(145deg, #d88db8 0%, #d88db8 100%);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .back-button:active {
+            transform: translateX(-3px);
+        }
+
+        .back-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .back-button {
+                top: 20px;
+                left: 20px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .back-icon {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Tombol Back -->
+    <a href="utama.html" onclick="window.history.back(); return false;" class="back-button">
+        <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        <span>Back</span>
+    </a>
+    <div class="container">
+        <div class="envelope-wrapper" id="envelopeWrapper">
+            <div class="envelope" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="wax-seal">
+                    <img src="static/assets/icon.png" alt="Wax Seal">
+                </div>
+            </div>
+        </div>
+        <p class="instruction">Click the envelope to open your letter</p>
+    </div>
+
+    <div class="letter-modal" id="letterModal">
+        <div class="letter">
+            <button class="close-btn" id="closeBtn">×</button>
+
+            <div class="letter-header">
+                <h2>A Letter For You</h2>
+                <div class="date">October 15, 2025</div>
+            </div>
+
+            <div class="letter-content">
+                <p class="greeting">My Dearest Friend,</p>
+
+                <p>Honestly, this is my first time making a website like this. Haha, kinda funny actually, because I’ve
+                    never done something like this before. But I just wanted to try something new—and well, here it is.
+                </p>
+
+                <p>Actually, I was a bit of a show-off, haha. I just wanted to show that I can actually do something
+                    like this easily.
+                </p>
+
+                <div class="highlight-quote">
+                    <p>From the small steps you take, courage grows that isn't always visible. Sometimes silence has
+                        meaning, because steadfastness doesn't always have to be voiced.</p>
+                </div>
+
+                <p>I was also thinking, I don't think you've ever made something like this before? Well, that's why I
+                    made it! It's not bad, right? It's just to be different from the others.</p>
+
+                <p>When you get married, don't forget to invite me. Even though I probably won't be there because you're
+                    so far away in Papua, I still have to invite you! Haha. Anyway, stay healthy, stay enthusiastic, and
+                    thank you for being my best friend all this time.</p>
+
+                <div class="highlight-quote">
+                    <p>May your days be filled with sunshine, your heart with joy, and your path with endless
+                        possibilities.</p>
+                </div>
+
+                <p>Take care of yourself, enjoy every moment, and never forget how special you are.</p>
+
+                <div class="signature">
+                    <div class="closing">With friend and warmest regards,</div>
+                    <div class="name">Your Friend</div>
+                    <div class="ps">Inas Wafiyah, Bachelor of Engineering in Informatics Engineering♡</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const envelopeWrapper = document.getElementById('envelopeWrapper');
+        const envelope = document.getElementById('envelope');
+        const letterModal = document.getElementById('letterModal');
+        const closeBtn = document.getElementById('closeBtn');
+
+        envelopeWrapper.addEventListener('click', function () {
+            envelope.classList.add('opened');
+            envelopeWrapper.classList.add('opened');
+            setTimeout(() => {
+                letterModal.classList.add('active');
+            }, 700);
+        });
+
+        closeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            letterModal.classList.remove('active');
+            setTimeout(() => {
+                envelope.classList.remove('opened');
+                envelopeWrapper.classList.remove('opened');
+            }, 400);
+        });
+
+        letterModal.addEventListener('click', function (e) {
+            if (e.target === letterModal) {
+                letterModal.classList.remove('active');
+                setTimeout(() => {
+                    envelope.classList.remove('opened');
+                    envelopeWrapper.classList.remove('opened');
+                }, 400);
+            }
+        });
+    </script>
+</body>
+
+</html>

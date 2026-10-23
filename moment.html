@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Moments</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #d88db8 0%, #d88db8 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Brick Wall Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                repeating-linear-gradient(0deg,
+                    rgba(255, 255, 255, 0.4) 0px,
+                    rgba(255, 255, 255, 0.4) 2px,
+                    transparent 2px,
+                    transparent 60px),
+                repeating-linear-gradient(90deg,
+                    rgba(255, 255, 255, 0.4) 0px,
+                    rgba(255, 255, 255, 0.4) 2px,
+                    transparent 2px,
+                    transparent 80px);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Clothesline */
+        .clothesline {
+            position: relative;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, #d4a574, #c99456, #d4a574);
+            margin: 30px 0 50px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            align-self: stretch;
+        }
+
+        .clothesline::before,
+        .clothesline::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #8b6f47;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .clothesline::before {
+            left: -4px;
+        }
+
+        .clothesline::after {
+            right: -4px;
+        }
+
+        /* Gallery Grid */
+        .gallery-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px 40px;
+            padding: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Gallery Item */
+        .gallery-item {
+            position: relative;
+            width: 320px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            animation: hangItem 0.6s ease backwards;
+        }
+
+        .gallery-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .gallery-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .gallery-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .gallery-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .gallery-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .gallery-item:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px) rotate(2deg);
+            z-index: 10;
+        }
+
+        /* Clothespin */
+        .clothespin {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 50px;
+            z-index: 5;
+        }
+
+        .clothespin::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(to bottom, #d4a574 0%, #b8935f 100%);
+            border-radius: 3px 3px 0 0;
+            box-shadow:
+                inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                0 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .clothespin::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 50%;
+            background: #8b6f47;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Photo Strip Card */
+        .photo-strip {
+            background: white;
+            padding: 20px 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .photo-strip-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .photo-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1.2 / 1;
+            overflow: hidden;
+            border: 2px solid #f0f0f0;
+            background: #fafafa;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-caption {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .photo-caption h3 {
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .photo-caption p {
+            font-size: 11px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Decorative Items */
+        .decorative-item {
+            position: absolute;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .decorative-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Positioning decorative items */
+        .deco-1 {
+            width: clamp(60px, 10vw, 100px);
+            height: clamp(60px, 10vw, 100px);
+            top: 10%;
+            left: 5%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .deco-2 {
+            width: clamp(70px, 12vw, 120px);
+            height: clamp(70px, 12vw, 120px);
+            top: 15%;
+            right: 8%;
+            animation: float 3.5s ease-in-out infinite;
+            animation-delay: 0.5s;
+        }
+
+        .deco-3 {
+            width: clamp(80px, 14vw, 140px);
+            height: clamp(80px, 14vw, 140px);
+            bottom: 15%;
+            left: 10%;
+            animation: float 4s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        .deco-4 {
+            width: clamp(50px, 8vw, 80px);
+            height: clamp(50px, 8vw, 80px);
+            bottom: 20%;
+            right: 5%;
+            animation: float 3.2s ease-in-out infinite;
+            animation-delay: 1.5s;
+        }
+
+        .deco-5 {
+            width: clamp(90px, 15vw, 150px);
+            height: clamp(90px, 15vw, 150px);
+            top: 50%;
+            right: 3%;
+            animation: float 3.8s ease-in-out infinite;
+            animation-delay: 0.8s;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            position: relative;
+            background: white;
+            padding: 30px 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: zoomIn 0.3s ease;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .lightbox-close:hover {
+            background: #ff5252;
+            transform: rotate(90deg);
+        }
+
+        @keyframes hangItem {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) rotate(-5deg);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(5deg);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 30px 15px;
+            }
+
+            .gallery-grid {
+                gap: 50px 20px;
+                padding: 10px;
+            }
+
+            .gallery-item {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .decorative-item {
+                opacity: 0.6;
+            }
+
+            .deco-1,
+            .deco-2 {
+                top: 5%;
+            }
+
+            .deco-3,
+            .deco-4 {
+                bottom: 5%;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .container {
+                padding: 0 60px;
+            }
+        }
+
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .back-button:active {
+            transform: translateX(-3px);
+        }
+
+        .back-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .back-button {
+                top: 20px;
+                left: 20px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .back-icon {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Tombol Back -->
+    <a href="utama.html" onclick="window.history.back(); return false;" class="back-button">
+        <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        <span>Back</span>
+    </a>
+    <!-- Decorative Items -->
+    <div class="decorative-item deco-1">
+        <img src="static/assets/paper.png" alt="Strawberry">
+    </div>
+    <div class="decorative-item deco-2">
+        <img src="static/assets/pita1.png" alt="Toast">
+    </div>
+    <div class="decorative-item deco-3">
+        <img src="static/assets/moment.png" alt="Palette">
+    </div>
+    <div class="decorative-item deco-4">
+        <img src="static/assets/bunga_purple.png" alt="Ribbon">
+    </div>
+    <div class="decorative-item deco-5">
+        <img src="static/assets/pita2.png" alt="Paper">
+    </div>
+
+    <div class="container">
+        <div class="clothesline"></div>
+
+        <div class="gallery-grid">
+            <!-- Gallery Item 1 -->
+            <div class="gallery-item" onclick="openLightbox(0)">
+                <div class="clothespin"></div>
+                <div class="photo-strip">
+                    <div class="photo-strip-inner">
+                        <div class="photo-frame">
+                            <img src="static/images/images2.jpeg" alt="Photo 1-1">
+                        </div>
+                        <div class="photo-frame">
+                            <img src="static/images/images5.jpeg" alt="Photo 1-2">
+                        </div>
+                        <div class="photo-frame">
+                            <img src="static/images/images6.jpeg" alt="Photo 1-3">
+                        </div>
+                        <div class="photo-frame">
+                            <img src="static/images/images4.jpeg" alt="Photo 1-4">
+                        </div>
+                    </div>
+                    <div class="photo-caption">
+                        <h3>Cirebon</h3>
+                        <p>2020-2026</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <button class="lightbox-close" onclick="closeLightbox(event)">×</button>
+            <div class="photo-strip" id="lightbox-strip">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openLightbox(index) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxStrip = document.getElementById('lightbox-strip');
+            const data = galleryData[index];
+
+            lightboxStrip.innerHTML = `
+                <div class="photo-strip-inner">
+                    <div class="photo-frame">
+                        <img src="${data.img}" alt="${data.title} 1">
+                    </div>
+                    <div class="photo-frame">
+                        <img src="${data.img}" alt="${data.title} 2">
+                    </div>
+                    <div class="photo-frame">
+                        <img src="${data.img}" alt="${data.title} 3">
+                    </div>
+                    <div class="photo-frame">
+                        <img src="${data.img}" alt="${data.title} 4">
+                    </div>
+                </div>
+                <div class="photo-caption">
+                    <h3>${data.title}</h3>
+                    <p>${data.date}</p>
+                </div>
+            `;
+
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox(event) {
+            if (event.target.id === 'lightbox' || event.target.classList.contains('lightbox-close')) {
+                event.stopPropagation();
+                const lightbox = document.getElementById('lightbox');
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function (e) {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('active') && e.key === 'Escape') {
+                closeLightbox({
+                    target: lightbox
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

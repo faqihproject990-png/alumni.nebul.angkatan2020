@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #d88db8 0%, #d88db8 50%, #6c72bb 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .player-container {
+            background: rgba(30, 30, 30, 0.75);
+            border-radius: 24px;
+            padding: 100px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+        }
+
+        .album-art {
+            width: 100%;
+            aspect-ratio: 2/1;
+            border-radius: 16px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .device-info {
+            color: #b3b3b3;
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .song-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .artist-info {
+            color: #b3b3b3;
+            font-size: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .verified-badge {
+            width: 18px;
+            height: 18px;
+            background: #1DB954;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .progress-container {
+            margin-bottom: 24px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #4d4d4d;
+            border-radius: 2px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #ffffff;
+            border-radius: 2px;
+            width: 7.5%;
+            position: relative;
+            transition: width 0.1s ease;
+        }
+
+        .progress-fill:hover {
+            background: #1DB954;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .progress-bar:hover .progress-fill::after {
+            opacity: 1;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            color: #b3b3b3;
+            font-size: 12px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #b3b3b3;
+            cursor: pointer;
+            padding: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .control-btn.play-pause {
+            background: #ffffff;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            color: #000000;
+        }
+
+        .control-btn.play-pause:hover {
+            transform: scale(1.08);
+            background: #f0f0f0;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .volume-icon {
+            color: #b3b3b3;
+            width: 20px;
+            flex-shrink: 0;
+        }
+
+        .volume-bar {
+            flex: 1;
+            height: 4px;
+            background: #4d4d4d;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .volume-fill {
+            height: 100%;
+            background: #ffffff;
+            border-radius: 2px;
+            width: 70%;
+            position: relative;
+            transition: width 0.1s ease;
+        }
+
+        .volume-fill:hover {
+            background: #1DB954;
+        }
+
+        .volume-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .volume-bar:hover .volume-fill::after {
+            opacity: 1;
+        }
+
+        .spotify-logo {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .spotify-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @media (max-width: 480px) {
+            .player-container {
+                padding: 24px;
+                max-width: 100%;
+            }
+
+            .song-title {
+                font-size: 20px;
+            }
+
+            .artist-info {
+                font-size: 14px;
+            }
+
+            .controls {
+                gap: 16px;
+            }
+
+            .control-btn.play-pause {
+                width: 48px;
+                height: 48px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .player-container {
+                max-width: 480px;
+                padding: 40px;
+            }
+        }
+
+        /* Icon SVGs */
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .icon-large {
+            width: 28px;
+            height: 28px;
+        }
+
+        .volume-container {
+            display: none;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .back-button:active {
+            transform: translateX(-3px);
+        }
+
+        .back-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .back-button {
+                top: 20px;
+                left: 20px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .back-icon {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Tombol Back -->
+    <a href="utama.html" onclick="window.history.back(); return false;" class="back-button">
+        <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        <span>Back</span>
+    </a>
+
+    <div class="player-container">
+        <div style="position: relative;">
+            <img src="static/images/images3.jpeg" alt="Album Art" class="album-art" id="albumArt"
+                style=width: 100%; height: auto; border-radius: 16px; object-fit: cover; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);> 
+            <div class="spotify-logo" style="position: absolute; bottom: 40px; right: 10px;">
+                <img src="static/assets/logo-spotify.png" alt="Spotify Logo"
+                    style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            </div>
+            <audio id="audioPlayer" src="static/audio/audio2.mp3"></audio>
+        </div>
+
+        <div class="device-info">
+            <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 24 24">
+                <path
+                    d="M17 2H7C5.9 2 5 2.9 5 4V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V4C19 2.9 18.1 2 17 2ZM17 18H7V6H17V18Z" />
+            </svg>
+            iPhone
+        </div>
+
+        <h1 class="song-title">Sebuah Kisah Klasik </h1>
+
+        <div class="artist-info">
+            <span>Sheila On 7</span>
+            <span class="verified-badge">✓</span>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="time-labels">
+                <span id="currentTime">0:01</span>
+                <span id="duration">-4:37</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" id="prevBtn">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z" />
+                </svg>
+            </button>
+
+            <button class="control-btn play-pause" id="playPauseBtn">
+                <svg class="icon-large" viewBox="0 0 24 24" id="pauseIcon">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                </svg>
+                <svg class="icon-large" viewBox="0 0 24 24" id="playIcon" style="display: none;">
+                    <path d="M8 5v14l11-7z" />
+                </svg>
+            </button>
+
+            <button class="control-btn" id="nextBtn">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M16 18h2V6h-2v12zM6 18l8.5-6L6 6v12z" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="volume-container">
+            <svg class="volume-icon" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+            </svg>
+            <div class="volume-bar" id="volumeBar">
+                <div class="volume-fill" id="volumeFill"></div>
+            </div>
+            <svg class="volume-icon" viewBox="0 0 24 24">
+                <path fill="currentColor"
+                    d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        let isPlaying = false;
+        let currentVolume = 70;
+
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const volumeBar = document.getElementById('volumeBar');
+        const volumeFill = document.getElementById('volumeFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        // Set tampilan awal: icon play terlihat, pause tersembunyi
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+
+        // Set volume awal
+        audioPlayer.volume = currentVolume / 100;
+
+        // Format waktu
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Update durasi ketika audio loaded
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = `-${formatTime(audioPlayer.duration)}`;
+        });
+
+        // Update progress bar otomatis
+        audioPlayer.addEventListener('timeupdate', () => {
+            const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            progressFill.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+
+            const remaining = audioPlayer.duration - audioPlayer.currentTime;
+            durationEl.textContent = `-${formatTime(remaining)}`;
+        });
+
+        // Play/Pause button
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audioPlayer.pause();
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                isPlaying = false;
+            } else {
+                audioPlayer.play();
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                isPlaying = true;
+            }
+        });
+
+        // Klik progress bar untuk skip
+        progressBar.addEventListener('click', (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            audioPlayer.currentTime = percent * audioPlayer.duration;
+        });
+
+        // Volume control
+        volumeBar.addEventListener('click', (e) => {
+            const rect = volumeBar.getBoundingClientRect();
+            const percent = ((e.clientX - rect.left) / rect.width) * 100;
+            currentVolume = percent;
+            volumeFill.style.width = percent + '%';
+            audioPlayer.volume = percent / 100;
+        });
+
+        // Previous button (restart lagu)
+        prevBtn.addEventListener('click', () => {
+            audioPlayer.currentTime = 0;
+            if (!isPlaying) {
+                audioPlayer.play();
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                isPlaying = true;
+            }
+        });
+
+        // Next button (restart lagu)
+        nextBtn.addEventListener('click', () => {
+            audioPlayer.currentTime = 0;
+            if (!isPlaying) {
+                audioPlayer.play();
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                isPlaying = true;
+            }
+        });
+
+        // Ketika lagu selesai
+        audioPlayer.addEventListener('ended', () => {
+            isPlaying = false;
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            audioPlayer.currentTime = 0;
+        });
+
+        // Spacebar untuk play/pause
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                playPauseBtn.click();
+            }
+        });
+    </script>
+</body>
+
+</html>
